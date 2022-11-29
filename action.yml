@@ -1,0 +1,17 @@
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions
+name: "EPFL ENAC Deploy"
+description: "EPFL ENAC-IT Deployment"
+inputs:
+  token:
+    description: "GitHub Token"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.token }}
+    - run: docker run --pull=always --rm -v /opt/github-actions-runner/root:/opt/root ghcr.io/epfl-enac/ansible:latest ${{ github.repository }}
+      shell: bash
