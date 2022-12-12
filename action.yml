@@ -13,5 +13,5 @@ runs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ inputs.token }}
-    - run: docker run --pull=always --rm -v /opt/github-actions-runner/root:/opt/root ghcr.io/epfl-enac/ansible:latest ${{ github.repository }}
+    - run: docker run --pull=always --rm -v /opt/github-actions-runner/root:/opt/root ghcr.io/epfl-enac/enacit-ansible:latest ${{ github.repository }}
       shell: bash
