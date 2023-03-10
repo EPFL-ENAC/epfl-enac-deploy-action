@@ -45,3 +45,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
+## Add your repo to enacit packages
+
+- https://github.com/orgs/EPFL-ENAC/packages/container/enacit-ansible/settings
