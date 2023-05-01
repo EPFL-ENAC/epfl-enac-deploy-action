@@ -1,17 +1,91 @@
-# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions
-name: "EPFL ENAC Deploy"
-description: "EPFL ENAC-IT Deployment"
+---
+name: "EPFL ENAC-IT4R Deploy"
+description: "EPFL ENAC-IT4R Deployment"
 inputs:
-  token:
-    description: "GitHub Token"
+  ENAC_IT4R_CD_environment:
+    description: "ENAC IT Continuous api environment"
     required: true
+  ENAC_IT4R_CD_deployment_secret:
+    description: "ENAC IT Continuous delivery secret key link to deployment_id"
+    required: true
+  ENAC_IT4R_CD_deployment_id:
+    description: "ENAC IT Continuous delivery deployment unique id"
+    required: true
+  timeout:
+    description: "Timeout before giving up in seconds"
+    required: false
+    default: "240"
+  interval:
+    description: "Interval between polling in seconds"
+    required: false
+    default: "5"
 runs:
   using: "composite"
   steps:
-    - uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ inputs.token }}
-    - run: docker run --pull=always --rm -v /opt/github-actions-runner/root:/opt/root ghcr.io/epfl-enac/enacit-ansible:latest ${{ github.repository }}
+    - id: set_url_api
+      shell: bash
+      name: SET enac it4r continuous api url based on environment
+      run: |
+        if [[ "$environment" == "prod" ]]; then
+          a="cd_url=$prod_url"
+        else
+          a="cd_url=$dev_url"
+        fi
+        echo $a >> "$GITHUB_OUTPUT"
+      env:
+        environment: ${{inputs.ENAC_IT4R_CD_environment}}
+        dev_url: "https://enac-test-cd-runner.epfl.ch"
+        prod_url: "https://enac-prod-cd-runner.epfl.ch"
+
+    - name: print cd runner url
+      shell: bash
+      id: print_runner
+      run: |
+        echo "$URL"
+      env:
+        URL: ${{ steps.set_url_api.outputs.cd_url }}
+
+    - name: REST API with curl
+      shell: bash
+      run: |
+        curl -H "Content-Type: application/json" -d "{\"deployment_secret\":\"$KEY\",\"deployment_id\":\"$id\"}" "$URL/app-deploy/" -o job.json
+      env:
+        KEY: ${{ inputs.ENAC_IT4R_CD_deployment_secret }}
+        id: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
+        URL: ${{ steps.set_url_api.outputs.cd_url }}
+
+    - id: job
+      shell: bash
+      name: read job id
+      run: |
+        a="job_id=$(cat job.json | jq -rc '.job_id ')"
+        echo $a
+        echo $a >> "$GITHUB_OUTPUT"
+
+    - name: GET job's status
+      shell: bash
+      run: |
+        curl -H "Content-Type: application/json" -d "{\"deployment_secret\":\"$KEY\",\"deployment_id\":\"$id\",\"job_id\":\"$JOB_ID\"}" "$URL/job-status/"  -o job_status.json
+      env:
+        KEY: ${{ inputs.ENAC_IT4R_CD_deployment_secret }}
+        id: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
+        URL: ${{ steps.set_url_api.outputs.cd_url }}
+        JOB_ID: ${{ steps.job.outputs.job_id }}
+
+    - name: Set job STATUS
+      shell: bash
+      id: jobapi
+      run: |
+        echo "status=$(cat job_status.json|jq -rc '.status ')" >> $GITHUB_ENV
+
+    - name: Poll until it's okay
+      if: env.status == 'starting'
+      id: main
+      run: |
+        timeout ${{inputs.timeout }} ${GITHUB_ACTION_PATH}/main.sh \
+        --url="${{ steps.set_url_api.outputs.cd_url }}/job-status/" \
+        --APP_NAME="${{ inputs.ENAC_IT4R_CD_deployment_id }}" \
+        --API_CD_TOKEN="${{ inputs.ENAC_IT4R_CD_deployment_secret }}" \
+        --JOB_ID="${{ steps.job.outputs.job_id }}" \
+        --interval="${{ inputs.interval }}"\
       shell: bash
