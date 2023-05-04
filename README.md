@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: EPFL-ENAC/epfl-enac-deploy-action@main
         with:
-          ENAC_IT4R_CD_environment: "dev"
+          ENAC_IT4R_CD_environment: "test"
           ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_ID }}
           ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_SECRET }}
 ```
@@ -86,7 +86,7 @@ Interval between polling in seconds
 ```
 uses: EPFL-ENAC/epfl-enac-deploy-action@main
 with:
-  ENAC_IT4R_CD_environment: "dev"
+  ENAC_IT4R_CD_environment: "test"
   ENAC_IT4R_CD_deployment_id: "demo-app"
   ENAC_IT4R_CD_deployment_secret: "xxx"
   timeout: 20
