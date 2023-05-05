@@ -58,9 +58,11 @@ runs:
       shell: bash
       name: read job id
       run: |
-        a="job_id=$(cat job.json | jq -rc '.job_id ')"
-        echo $a
-        echo $a >> "$GITHUB_OUTPUT"
+	jobid=$(cat job.json | jq -rc '.job_id')
+	if [ -z "$jobid" ]; then exit 1; else exit 0; fi
+        keyval="job_id=$jobid"
+        echo $keyval
+        echo $keyval >> "$GITHUB_OUTPUT"
 
     - name: GET job's status
       shell: bash
