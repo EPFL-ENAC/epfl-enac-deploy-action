@@ -6,7 +6,6 @@ This action makes a POST request to a given URL to deploy the app and then do a 
 to another URL until the status is `finished` or `error`
 Initially created for checking if a enac deployment is complete (via enacit-ansible)
 
-
 ## Create two secrets in your repository
 
 - under your repository settings in /settings/secrets/actions
@@ -64,15 +63,16 @@ jobs:
 
 ### `ENAC_IT4R_CD_environment`
 
-The environement to deploy to: dev or prod
+The environement to deploy to: test or prod
 
 ### `ENAC_IT4R_CD_deployment_id`
 
 The unique id associated with the deployment
 
 ### `ENAC_IT4R_CD_deployment_secret`
-  - The secret associated with the deployment_id
-  - only viable for that unique id
+
+- The secret associated with the deployment_id
+- only viable for that unique id
 
 ### `timeout`
 
@@ -83,6 +83,7 @@ Timeout before giving up in seconds
 Interval between polling in seconds
 
 ## Example usage
+
 ```
 uses: EPFL-ENAC/epfl-enac-deploy-action@main
 with:
@@ -94,6 +95,7 @@ with:
 ```
 
 ## the main.sh
+
 This script expects a json response from the polling url in the following format:
 
 ```
