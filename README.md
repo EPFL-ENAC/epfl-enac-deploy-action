@@ -9,7 +9,8 @@ Initially created for checking if a enac deployment is complete (via enacit-ansi
 ## Create two secrets in your repository
 
 - under your repository settings in /settings/secrets/actions
-- Add DEPLOYMENT_SECRET and DEPLOYMENT_ID given by the linux enacit-linux-sysadmins@epfl.ch
+- Add DEPLOYMENT_TEST_SECRET and DEPLOYMENT_TEST_ID given by the linux enacit-linux-sysadmins@epfl.ch
+- Add DEPLOYMENT_PROD_SECRET and DEPLOYMENT_PROD_ID given by the linux enacit-linux-sysadmins@epfl.ch
 
 ## Add Continuous Deployment to PROD hosting
 
@@ -31,8 +32,8 @@ jobs:
       - uses: EPFL-ENAC/epfl-enac-deploy-action@main
         with:
           ENAC_IT4R_CD_environment: "prod"
-          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_ID }}
-          ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_SECRET }}
+          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_PROD_ID }}
+          ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_PROD_SECRET }}
 ```
 
 ## Add Continuous Deployment to TEST hosting
@@ -55,8 +56,8 @@ jobs:
       - uses: EPFL-ENAC/epfl-enac-deploy-action@main
         with:
           ENAC_IT4R_CD_environment: "test"
-          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_ID }}
-          ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_SECRET }}
+          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_TEST_ID }}
+          ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_TEST_SECRET }}
 ```
 
 ## Inputs
