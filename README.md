@@ -3,7 +3,7 @@
 EPFL ENAC-IT Continuous Deployment
 
 This action makes a POST request to a given URL to deploy the app and then do a loop
-to another URL until the status is `finished` or `error`
+to another URL until the status is `success` or `error`
 Initially created for checking if a enac deployment is complete (via enacit-ansible)
 
 ## Create two secrets in your repository
@@ -101,10 +101,10 @@ This script expects a json response from the polling url in the following format
 
 ```
 {
-  status: "finished" | "error",
+  status: "success" | "error",
   output: "aeae",
 }
 ```
 
-Script exit with 1 when status is `error` and 0 when `finished`
-Exit with 1 if timeout reached before receiving `error` or `finished` as status
+Script exit with 1 when status is `error` and 0 when `success`
+Exit with 1 if timeout reached before receiving `error` or `success` as status
