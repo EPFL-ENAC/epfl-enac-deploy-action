@@ -28,10 +28,10 @@ parser.add_argument(
 )
 parser.add_argument("--deployment-id", type=str, help="deployment id", required=True)
 parser.add_argument(
-    "--interval", type=int, help="polling interval in seconds", default=5
+    "--interval", type=int, help="polling interval in seconds", default=2
 )
 parser.add_argument(
-    "--timeout", type=int, help="timeout before giving up in seconds", default=240
+    "--timeout", type=int, help="timeout before giving up in seconds", default=480
 )
 args = parser.parse_args()
 

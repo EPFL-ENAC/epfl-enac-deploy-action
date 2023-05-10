@@ -1,44 +1,8 @@
-# epfl-enac-deploy-action
+# EPFL ENAC-IT Continuous Deployment
 
-EPFL ENAC-IT Continuous Deployment
+This action implements ENAC-IT's Continuous Deployment for your app on a given environment (test or prod).
 
-This action makes a POST request to a given URL to deploy the app and then do a loop
-to another URL until the status is `success` or `error`
-Initially created for checking if a enac deployment is complete (via enacit-ansible)
-
-## Create two secrets in your repository
-
-- under your repository settings in /settings/secrets/actions
-- Add DEPLOYMENT_TEST_SECRET and DEPLOYMENT_TEST_ID given by the linux enacit-linux-sysadmins@epfl.ch
-- Add DEPLOYMENT_PROD_SECRET and DEPLOYMENT_PROD_ID given by the linux enacit-linux-sysadmins@epfl.ch
-
-## Add Continuous Deployment to PROD hosting
-
-Create `.github/workflows/deploy-prod.yml` containing :
-
-```yml
-# https://github.com/EPFL-ENAC/epfl-enac-deploy-action#readme
-name: deploy-prod
-
-"on":
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: EPFL-ENAC/epfl-enac-deploy-action@main
-        with:
-          ENAC_IT4R_CD_environment: "prod"
-          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_PROD_ID }}
-          ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_PROD_SECRET }}
-```
-
-## Add Continuous Deployment to TEST hosting
-
-Create `.github/workflows/deploy-test.yml` containing :
+To use it in your repository, create a workflow file named `.github/workflows/deploy-test.yml` with the following content:
 
 ```yml
 # https://github.com/EPFL-ENAC/epfl-enac-deploy-action#readme
@@ -60,37 +24,46 @@ jobs:
           ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_TEST_SECRET }}
 ```
 
+To deploy to production, name preferably that file `.github/workflows/deploy-prod.yml` and simply replace:
+
+- `develop` with `main`
+- `test` with `prod`
+- `DEPLOYMENT_TEST_*` with `DEPLOYMENT_PROD_*`
+
+## Create two secrets in your repository
+
+Under your repository settings in /settings/secrets/actions
+
+- For test: add `DEPLOYMENT_TEST_SECRET` and `DEPLOYMENT_TEST_ID`
+- For prod: add `DEPLOYMENT_PROD_SECRET` and `DEPLOYMENT_PROD_ID`
+
+Their values are provided by ENAC-IT while discussing the hosting agreement.
+
 ## Inputs
 
-### `ENAC_IT4R_CD_environment`
+- `ENAC_IT4R_CD_environment`:
+  The environement to deploy to: `test` or `prod` - (mandatory)
 
-The environement to deploy to: test or prod
+- `ENAC_IT4R_CD_deployment_id`:
+  The unique id associated with the deployment - (mandatory)
 
-### `ENAC_IT4R_CD_deployment_id`
+- `ENAC_IT4R_CD_deployment_secret`:
+  The secret associated with the deployment_id - (mandatory)
 
-The unique id associated with the deployment
+- `timeout`:
+  Timeout before giving up in seconds. Default: 480 (8 minutes)
 
-### `ENAC_IT4R_CD_deployment_secret`
+- `interval`:
+  Interval between polling in seconds. Default: 2 seconds
 
-- The secret associated with the deployment_id
-- only viable for that unique id
-
-### `timeout`
-
-Timeout before giving up in seconds
-
-### `interval`
-
-Interval between polling in seconds
-
-## Example usage
+## Example usage with custom timeout and interval
 
 ```
 uses: EPFL-ENAC/epfl-enac-deploy-action@main
 with:
   ENAC_IT4R_CD_environment: "test"
-  ENAC_IT4R_CD_deployment_id: "demo-app"
-  ENAC_IT4R_CD_deployment_secret: "xxx"
-  timeout: 20
-  interval: 5
+  ENAC_IT4R_CD_deployment_id: "my-app-deploy-id"
+  ENAC_IT4R_CD_deployment_secret: "my-app-deploy-secret"
+  timeout: 600
+  interval: 10
 ```

@@ -14,11 +14,11 @@ inputs:
   interval:
     description: "Polling interval in seconds"
     required: false
-    default: "5"
+    default: "2"
   timeout:
     description: "Timeout before giving up in seconds"
     required: false
-    default: "240"
+    default: "480"
 runs:
   using: "composite"
   steps:
