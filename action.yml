@@ -3,95 +3,59 @@ name: "EPFL ENAC-IT4R Deploy"
 description: "EPFL ENAC-IT4R Deployment"
 inputs:
   ENAC_IT4R_CD_environment:
-    description: "ENAC IT Continuous api environment"
-    required: true
-  ENAC_IT4R_CD_deployment_secret:
-    description: "ENAC IT Continuous delivery secret key link to deployment_id"
+    description: "Deployment environment"
     required: true
   ENAC_IT4R_CD_deployment_id:
-    description: "ENAC IT Continuous delivery deployment unique id"
+    description: "App deployment ID"
     required: true
+  ENAC_IT4R_CD_deployment_secret:
+    description: "App deployment secret"
+    required: true
+  interval:
+    description: "Polling interval in seconds"
+    required: false
+    default: "5"
   timeout:
     description: "Timeout before giving up in seconds"
     required: false
     default: "240"
-  interval:
-    description: "Interval between polling in seconds"
-    required: false
-    default: "5"
 runs:
   using: "composite"
   steps:
-    - id: set_url_api
-      shell: bash
-      name: SET enac it4r continuous api url based on environment
-      run: |
-        if [[ "$environment" == "prod" ]]; then
-          a="cd_url=$prod_url"
-        else
-          a="cd_url=$dev_url"
-        fi
-        echo $a >> "$GITHUB_OUTPUT"
-      env:
-        environment: ${{inputs.ENAC_IT4R_CD_environment}}
-        dev_url: "https://enac-test-cd-runner.epfl.ch"
-        prod_url: "https://enac-prod-cd-runner.epfl.ch"
+  - name: Checkout epfl-enac-deploy-action
+    uses: actions/checkout@v3
+    with:
+      repository: EPFL-ENAC/epfl-enac-deploy-action
+      ref: main
+      path: epfl-enac-deploy-action
 
-    - name: print cd runner url
-      shell: bash
-      id: print_runner
-      run: |
-        echo "$URL"
-      env:
-        URL: ${{ steps.set_url_api.outputs.cd_url }}
+  - name: Set up Python 3.10
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.10'
 
-    - name: REST API with curl
-      shell: bash
-      run: |
-        curl -H "Content-Type: application/json" -d "{\"deployment_secret\":\"$KEY\",\"deployment_id\":\"$id\"}" "$URL/app-deploy/" -o job.json
-      env:
-        KEY: ${{ inputs.ENAC_IT4R_CD_deployment_secret }}
-        id: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
-        URL: ${{ steps.set_url_api.outputs.cd_url }}
+  - name: Cache dependencies
+    id: cache
+    uses: actions/cache@v3
+    with:
+      path: ~/.cache/pip
+      key: ${{ runner.os }}-pip-${{ hashFiles('epfl-enac-deploy-action/requirements.txt') }}
+      restore-keys: |
+        ${{ runner.os }}-pip-
 
-    - id: job
-      shell: bash
-      name: read job id
-      run: |
-        status=$(cat job.json | jq -rc '.status')
-        error_message=$(cat job.json | jq -rc '.error')
-        if [[ "error" == $status ]]; then echo "error: $error_message"; exit 1; fi
-        jobid=$(cat job.json | jq -rc '.job_id')
-        if [ -z "$jobid" ]; then exit 1; else exit 0; fi
-        keyval="job_id=$jobid"
-        echo $keyval
-        echo $keyval >> "$GITHUB_OUTPUT"
+  - name: Install dependencies from requirements.txt
+    shell: bash
+    if: steps.cache.outputs.cache-hit != 'true'
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r epfl-enac-deploy-action/requirements.txt
 
-    - name: GET job's status
-      shell: bash
-      run: |
-        curl -H "Content-Type: application/json" -d "{\"deployment_secret\":\"$KEY\",\"deployment_id\":\"$id\",\"job_id\":\"$JOB_ID\"}" "$URL/job-status/"  -o job_status.json
-      env:
-        KEY: ${{ inputs.ENAC_IT4R_CD_deployment_secret }}
-        id: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
-        URL: ${{ steps.set_url_api.outputs.cd_url }}
-        JOB_ID: ${{ steps.job.outputs.job_id }}
-
-    - name: Set job STATUS
-      shell: bash
-      id: jobapi
-      run: |
-        echo $(cat job_status.json|jq -rc '.output')
-        echo "status=$(cat job_status.json|jq -rc '.status')" >> $GITHUB_ENV
-
-    - name: Poll until it's okay
-      if: env.status == 'starting'
-      id: main
-      run: |
-        timeout ${{inputs.timeout }} ${GITHUB_ACTION_PATH}/main.sh \
-        --url="${{ steps.set_url_api.outputs.cd_url }}/job-status/" \
-        --APP_NAME="${{ inputs.ENAC_IT4R_CD_deployment_id }}" \
-        --API_CD_TOKEN="${{ inputs.ENAC_IT4R_CD_deployment_secret }}" \
-        --JOB_ID="${{ steps.job.outputs.job_id }}" \
-        --interval="${{ inputs.interval }}"\
-      shell: bash
+  - name: Run Python script main.py
+    shell: bash
+    env:
+      DEPLOYMENT_SECRET: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
+    run: python epfl-enac-deploy-action/main.py \
+      --env ${{ inputs.ENAC_IT4R_CD_environment }} \
+      --deployment-id ${{ inputs.ENAC_IT4R_CD_deployment_id }} \
+      --interval ${{ inputs.interval }} \
+      --timeout ${{ inputs.timeout }}

@@ -94,17 +94,3 @@ with:
   timeout: 20
   interval: 5
 ```
-
-## the main.sh
-
-This script expects a json response from the polling url in the following format:
-
-```
-{
-  status: "success" | "error",
-  output: "aeae",
-}
-```
-
-Script exit with 1 when status is `error` and 0 when `success`
-Exit with 1 if timeout reached before receiving `error` or `success` as status
