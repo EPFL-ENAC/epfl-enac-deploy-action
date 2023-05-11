@@ -43,8 +43,8 @@ runs:
     shell: bash
     env:
       DEPLOYMENT_SECRET: ${{ inputs.ENAC_IT4R_CD_deployment_id }}
-    run: python epfl-enac-deploy-action/main.py \
-      --env ${{ inputs.ENAC_IT4R_CD_environment }} \
-      --deployment-id ${{ inputs.ENAC_IT4R_CD_deployment_id }} \
-      --interval ${{ inputs.interval }} \
+    run: python epfl-enac-deploy-action/main.py
+      --env ${{ inputs.ENAC_IT4R_CD_environment }}
+      --deployment-id ${{ inputs.ENAC_IT4R_CD_deployment_id }}
+      --interval ${{ inputs.interval }}
       --timeout ${{ inputs.timeout }}
