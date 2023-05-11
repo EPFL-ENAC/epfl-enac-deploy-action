@@ -78,7 +78,7 @@ class Output:
 
 
 # Start the story
-print(f"-> Asking for app-deploy of {args.deployment_id} on {ROOT_URL}!")
+print(f"-> Asking for app-deploy of {args.deployment_id} on {ROOT_URL}")
 response = talk_to_cd(
     action="app-deploy",
     json={"deployment_id": args.deployment_id, "deployment_secret": DEPLOYMENT_SECRET},
@@ -100,9 +100,9 @@ with Output() as output:
         )
         output.print(response["output"])
         if response["status"] == "error":
-            print("! Error: App deploy failed!")
+            print("! Error: App deploy failed")
             sys.exit(1)
         if response["status"] == "success":
-            print("-> App deploy finished successfully!")
+            print("-> App deploy finished successfully")
             break
         time.sleep(args.interval)
