@@ -20,7 +20,7 @@ jobs:
       - uses: EPFL-ENAC/epfl-enac-deploy-action@main
         with:
           ENAC_IT4R_CD_environment: "test"
-          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_TEST_ID }}
+          ENAC_IT4R_CD_deployment_id: "deployment_test_id given by ENAC-IT"
           ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_TEST_SECRET }}
 ```
 
@@ -28,14 +28,14 @@ To deploy to production, name preferably that file `.github/workflows/deploy-pro
 
 - `develop` with `main`
 - `test` with `prod`
-- `DEPLOYMENT_TEST_*` with `DEPLOYMENT_PROD_*`
+- `DEPLOYMENT_TEST_SECRET` with `DEPLOYMENT_PROD_SECRET`
 
 ## Create two secrets in your repository
 
 Under your repository settings in /settings/secrets/actions
 
-- For test: add `DEPLOYMENT_TEST_SECRET` and `DEPLOYMENT_TEST_ID`
-- For prod: add `DEPLOYMENT_PROD_SECRET` and `DEPLOYMENT_PROD_ID`
+- For test: add `DEPLOYMENT_TEST_SECRET`
+- For prod: add `DEPLOYMENT_PROD_SECRET`
 
 Their values are provided by ENAC-IT while discussing the hosting agreement.
 
@@ -63,7 +63,7 @@ uses: EPFL-ENAC/epfl-enac-deploy-action@main
 with:
   ENAC_IT4R_CD_environment: "test"
   ENAC_IT4R_CD_deployment_id: "my-app-deploy-id"
-  ENAC_IT4R_CD_deployment_secret: "my-app-deploy-secret"
+  ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_TEST_SECRET }}
   timeout: 600
   interval: 10
 ```
