@@ -19,7 +19,7 @@ CD_URLS = {
     "test": "https://enac-test-cd-runner.epfl.ch",
     "prod": "https://enac-prod-cd-runner.epfl.ch",
 }
-DEPLOYMENT_SECRET = os.environ.get("ENAC_IT4R_CD_deployment_secret")
+DEPLOYMENT_SECRET = os.environ.get("DEPLOYMENT_SECRET")
 
 # Read arguments
 parser = argparse.ArgumentParser(prog="main", description="CD app-deploy client")
