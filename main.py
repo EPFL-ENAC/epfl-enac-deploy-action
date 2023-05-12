@@ -51,14 +51,20 @@ signal.alarm(args.timeout)
 
 
 def talk_to_cd(action, json):
-    r = requests.post(
-        f"{ROOT_URL}/{action}/",
-        json=json,
-    )
-    if r.status_code != 200:
-        print(f"! Error: failed to ask for {action}: {r.status_code=} {r.text=}")
-        sys.exit(1)
-    return r.json()
+    for i in range(10):
+        # make 10 attempts (10s)
+        # because when we CD the CD runner itself,
+        # we may receive r.status_code=502 r.text='Bad Gateway'
+        r = requests.post(
+            f"{ROOT_URL}/{action}/",
+            json=json,
+        )
+        if r.status_code == 200:
+            return r.json()
+        time.sleep(1)
+
+    print(f"! Error: failed to ask for {action}: {r.status_code=} {r.text=}")
+    sys.exit(1)
 
 
 class Output:
