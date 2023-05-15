@@ -20,6 +20,7 @@ CD_URLS = {
     "prod": "https://enac-prod-cd-runner.epfl.ch",
 }
 DEPLOYMENT_SECRET = os.environ.get("DEPLOYMENT_SECRET")
+HEADERS = {"Content-type": "application/json"}
 
 # Read arguments
 parser = argparse.ArgumentParser(prog="main", description="CD app-deploy client")
@@ -57,6 +58,7 @@ def talk_to_cd(action, json):
         # we may receive r.status_code=502 r.text='Bad Gateway'
         r = requests.post(
             f"{ROOT_URL}/{action}/",
+            headers=HEADERS,
             json=json,
         )
         if r.status_code == 200:
