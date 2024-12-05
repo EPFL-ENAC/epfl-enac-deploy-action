@@ -17,7 +17,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: EPFL-ENAC/epfl-enac-deploy-action@main
+      - uses: EPFL-ENAC/epfl-enac-deploy-action@v1.0.0
         with:
           ENAC_IT4R_CD_environment: "test"
           ENAC_IT4R_CD_deployment_id: "deployment_test_id given by ENAC-IT"
